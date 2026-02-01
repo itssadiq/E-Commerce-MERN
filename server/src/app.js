@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const connectDB = require("./config/database");
 const cors = require("cors");
+const { authRouter } = require("./router/auth");
 
 const app = express();
 app.use(
@@ -14,6 +15,8 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+
+app.use("/auth", authRouter);
 
 const port = process.env.PORT || 5000;
 
