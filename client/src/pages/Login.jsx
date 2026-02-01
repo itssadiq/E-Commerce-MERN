@@ -1,25 +1,8 @@
-import React, { useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import FormContainer from "../components/auth/FormContainer";
 import LoginForm from "../components/auth/LoginForm";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { search } = useLocation();
-  const sp = new URLSearchParams(search);
-  const redirect = sp.get("redirect") || "/";
-
-  useEffect(() => {
-    // if (userInfo) {
-    //   navigate(redirect);
-    // }
-  }, [navigate, redirect]);
-
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    // Implementation logic goes here
-  };
-
   return (
     <FormContainer>
       <div className="sm:mx-auto sm:w-full sm:max-w-md mb-6">
@@ -28,7 +11,7 @@ const Login = () => {
         </h2>
       </div>
 
-      <LoginForm submitHandler={submitHandler} />
+      <LoginForm />
 
       {/* Footer Links */}
       <div className="mt-6">

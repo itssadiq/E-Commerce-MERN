@@ -6,14 +6,14 @@ export const authApi = createApi({
     baseUrl: "http://localhost:3000/auth/",
     credentials: "include",
   }),
-  endpoints: (build) => {
+  endpoints: (build) => ({
     signUpUser: build.mutation({
       query: (newUser) => ({
         url: "signup",
         method: "POST",
         body: newUser,
       }),
-    });
+    }),
 
     loginUser: build.mutation({
       query: (credentials) => ({
@@ -21,16 +21,8 @@ export const authApi = createApi({
         method: "POST",
         body: credentials,
       }),
-    });
-
-    logoutUser: build.mutation({
-        query() => ({
-            url:'logout',
-            method: "POST",
-            body: 
-        })
-    })
-  },
+    }),
+  }),
 });
 
 export const { useLoginUserMutation, useSignUpUserMutation } = authApi;

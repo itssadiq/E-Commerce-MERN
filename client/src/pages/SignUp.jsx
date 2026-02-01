@@ -16,10 +16,6 @@ const SignUp = () => {
     // }
   }, [navigate, redirect]);
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-  };
-
   return (
     <FormContainer>
       <div className="sm:mx-auto sm:w-full sm:max-w-md mb-6">
@@ -28,7 +24,7 @@ const SignUp = () => {
         </h2>
       </div>
 
-      <SignUpForm submitHandler={submitHandler} />
+      <SignUpForm />
 
       {/* Footer Links */}
       <div className="mt-6">
