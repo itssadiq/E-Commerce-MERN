@@ -5,6 +5,7 @@ dotenv.config();
 const connectDB = require("./config/database");
 const cors = require("cors");
 const { authRouter } = require("./router/auth");
+const { productRouter } = require("./router/product");
 
 const app = express();
 app.use(
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", authRouter);
+app.use("/products", productRouter);
 
 const port = process.env.PORT || 5000;
 

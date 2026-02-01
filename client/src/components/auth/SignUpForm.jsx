@@ -48,11 +48,7 @@ const SignUpForm = () => {
       noValidate
     >
       {/* Name Input */}
-      {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <div className="text-red-600 mb-4">{error}</div>}
       <div>
         <label
           htmlFor="name"
