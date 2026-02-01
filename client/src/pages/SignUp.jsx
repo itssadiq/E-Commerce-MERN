@@ -45,7 +45,7 @@ const SignUp = () => {
 
         <div className="mt-6 text-center">
           <Link
-            to="/"
+            to="/login"
             className="font-medium text-indigo-600 hover:text-indigo-500"
           >
             Log in
