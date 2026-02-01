@@ -38,7 +38,6 @@ const SignUpForm = () => {
           err?.message ||
           "Something went wrong. Please try again.",
       );
-      reset();
     }
   };
 

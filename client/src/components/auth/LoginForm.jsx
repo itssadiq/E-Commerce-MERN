@@ -9,6 +9,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loginUser] = useLoginUserMutation();
+  const [success, setSuccess] = useState("");
 
   const {
     register,
@@ -23,9 +24,12 @@ const LoginForm = () => {
   const submitHandler = async (formData) => {
     try {
       setError("");
-      await loginUser(formData).unwrap();
+      setSuccess("");
+      const res = await loginUser(formData).unwrap();
       reset();
-      setError("Login Successfull");
+      setSuccess(
+        res?.message || res?.data?.message || "Registered successfully",
+      );
     } catch (err) {
       console.error(err);
       setError(
@@ -34,7 +38,6 @@ const LoginForm = () => {
           err?.message ||
           "Login failed. Please try again.",
       );
-      reset();
     }
   };
 
@@ -45,11 +48,8 @@ const LoginForm = () => {
       noValidate
     >
       {/* Email Input */}
-      {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
-          {error}
-        </div>
-      )}
+      {error && <div className="text-red-600 mb-4">{error}</div>}
+      {success && <div className="text-green-600 mb-4">{success}</div>}
       <div>
         <label
           htmlFor="email"
