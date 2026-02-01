@@ -66,6 +66,23 @@ productRouter.delete("/deleteProduct/:id", async (req, res) => {
   }
 });
 
+productRouter.patch("/editProduct/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+
+    const product = await Product.findByIdAndUpdate(id, data);
+
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    res.send({ message: "Product Updated", product });
+  } catch (error) {
+    res.status(400).send({ message: "BAD REQUEST", error: error.message });
+  }
+});
+
 module.exports = {
   productRouter,
 };
