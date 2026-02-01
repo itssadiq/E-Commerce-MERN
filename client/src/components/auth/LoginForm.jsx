@@ -3,9 +3,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "./loginSchema";
 import { Eye, EyeOff } from "lucide-react";
+import { useLoginUserMutation } from "../../services/auth";
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loginUser] = useLoginUserMutation();
+
   const {
     register,
     handleSubmit,
@@ -17,8 +21,21 @@ const LoginForm = () => {
   });
 
   const submitHandler = async (formData) => {
-    console.log(formData);
-    reset();
+    try {
+      setError("");
+      await loginUser(formData).unwrap();
+      reset();
+      setError("Login Successfull");
+    } catch (err) {
+      console.error(err);
+      setError(
+        err?.data?.error ||
+          err?.error ||
+          err?.message ||
+          "Login failed. Please try again.",
+      );
+      reset();
+    }
   };
 
   return (
@@ -28,6 +45,11 @@ const LoginForm = () => {
       noValidate
     >
       {/* Email Input */}
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
+          {error}
+        </div>
+      )}
       <div>
         <label
           htmlFor="email"
@@ -96,6 +118,7 @@ const LoginForm = () => {
         <button
           type="submit"
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          disabled={isSubmitting}
         >
           {isSubmitting ? "Signing In..." : "Sign In"}
         </button>

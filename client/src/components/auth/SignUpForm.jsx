@@ -3,10 +3,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useSignUpUserMutation } from "../../services/auth";
+import { useNavigate } from "react-router-dom";
 
 const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const [signUpUser] = useSignUpUserMutation();
+
   const {
     register,
     handleSubmit,
@@ -17,10 +24,22 @@ const SignUpForm = () => {
     mode: "onTouched",
   });
 
-  const submitHandler = async (formData, e) => {
-    e.preventDefault();
-    console.log(formData);
-    reset();
+  const submitHandler = async (formData) => {
+    try {
+      setError("");
+      await signUpUser(formData).unwrap();
+      reset();
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+      setError(
+        err?.data?.error ||
+          err?.error ||
+          err?.message ||
+          "Something went wrong. Please try again.",
+      );
+      reset();
+    }
   };
 
   return (
@@ -30,6 +49,11 @@ const SignUpForm = () => {
       noValidate
     >
       {/* Name Input */}
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">
+          {error}
+        </div>
+      )}
       <div>
         <label
           htmlFor="name"
