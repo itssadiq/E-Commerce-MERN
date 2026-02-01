@@ -48,6 +48,24 @@ productRouter.post("/addProduct", async (req, res) => {
   }
 });
 
+productRouter.delete("/deleteProduct/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log(id);
+
+    const product = await Product.findByIdAndDelete(id);
+
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    res.send({ message: "Product deleted", product });
+  } catch (error) {
+    res.status(400).send({ message: "BAD REQUEST", error: error.message });
+  }
+});
+
 module.exports = {
   productRouter,
 };
