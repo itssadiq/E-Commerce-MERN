@@ -28,6 +28,26 @@ productRouter.get("/getProduct/:id", async (req, res) => {
   }
 });
 
+productRouter.post("/addProduct", async (req, res) => {
+  try {
+    const { name, description, price, category, imageURL } = req.body;
+
+    const product = await Product({
+      name,
+      description,
+      price,
+      category,
+      imageURL,
+    });
+
+    await product.save();
+
+    res.send({ message: "Product added successfully", product });
+  } catch (error) {
+    res.status(400).send({ message: "BAD REQUEST", error: error.message });
+  }
+});
+
 module.exports = {
   productRouter,
 };
