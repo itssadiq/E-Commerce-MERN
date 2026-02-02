@@ -32,7 +32,7 @@ const Header = () => {
   const logoutHandler = () => {
     dispatch(removeCredentials());
     logoutUser();
-    // navigate("/login");
+    navigate("/login");
   };
 
   return (

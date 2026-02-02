@@ -47,6 +47,14 @@ const SignUp = () => {
             Log in
           </Link>
         </div>
+        <div className="mt-6 text-center">
+          <Link
+            to="/"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
+          >
+            Back to Home
+          </Link>
+        </div>
       </div>
     </FormContainer>
   );
