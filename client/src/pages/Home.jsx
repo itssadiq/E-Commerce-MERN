@@ -1,5 +1,7 @@
+import Footer from "../components/Footer";
 import HeroSection from "../components/Home/HeroSection";
 import ProductCard from "../components/Home/ProductCard";
+import Header from "../components/Header";
 import { useGetAllProductsQuery } from "../services/product";
 
 const Home = () => {
@@ -8,6 +10,7 @@ const Home = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <Header />
       {/* Hero Banner */}
       <HeroSection />
 
@@ -39,6 +42,8 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      <Footer />
     </div>
   );
 };

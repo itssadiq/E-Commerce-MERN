@@ -2,6 +2,7 @@ const express = require("express");
 const { validateSignUp, validateLogin } = require("../lib/utils");
 const { User } = require("../model/auth");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const authRouter = express.Router();
 
@@ -78,6 +79,22 @@ authRouter.post("/logout", async (req, res) => {
   } catch (err) {
     res.status(400).send({ message: "BAD REQUEST", error: err.message });
   }
+});
+
+authRouter.get("/profile", async (req, res) => {
+  const { token } = req.cookies;
+
+  if (!token) {
+    res.status(400).send("Please login first");
+  }
+
+  const { id } = jwt.verify(token, process.env.SECRET_KEY);
+
+  const user = await User.findById(id);
+
+  const userInfo = { name: user.name, email: user.email };
+
+  res.send(userInfo);
 });
 
 module.exports = {

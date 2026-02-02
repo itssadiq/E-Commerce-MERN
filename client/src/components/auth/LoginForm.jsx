@@ -4,12 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "./loginSchema";
 import { Eye, EyeOff } from "lucide-react";
 import { useLoginUserMutation } from "../../services/auth";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loginUser] = useLoginUserMutation();
   const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const {
     register,
@@ -27,6 +29,7 @@ const LoginForm = () => {
       setSuccess("");
       const res = await loginUser(formData).unwrap();
       reset();
+      navigate("/");
       setSuccess(
         res?.message || res?.data?.message || "Registered successfully",
       );

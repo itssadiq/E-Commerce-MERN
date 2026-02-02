@@ -22,7 +22,23 @@ export const authApi = createApi({
         body: credentials,
       }),
     }),
+
+    logoutUser: build.mutation({
+      query: () => ({
+        url: "logout",
+        method: "POST",
+      }),
+    }),
+
+    profileInfo: build.query({
+      query: () => "/profile",
+    }),
   }),
 });
 
-export const { useLoginUserMutation, useSignUpUserMutation } = authApi;
+export const {
+  useLoginUserMutation,
+  useSignUpUserMutation,
+  useLogoutUserMutation,
+  useProfileInfoQuery,
+} = authApi;
