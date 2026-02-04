@@ -30,6 +30,10 @@ const AuthSchema = Schema(
       type: Boolean,
       default: false,
     },
+    isAdmin: {
+      type: Boolean,
+      default: true,
+    },
     password: {
       type: String,
       trim: true,

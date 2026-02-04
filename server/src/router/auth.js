@@ -92,7 +92,12 @@ authRouter.get("/profile", async (req, res) => {
 
   const user = await User.findById(id);
 
-  const userInfo = { name: user.name, email: user.email };
+  const userInfo = {
+    name: user.name,
+    email: user.email,
+    isAdmin: user.isAdmin,
+    isSuperAdmin: user.isSuperAdmin,
+  };
 
   res.send(userInfo);
 });
