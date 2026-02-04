@@ -6,6 +6,7 @@ const UserEditModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     name: "",
     email: "",
     isAdmin: false,
+    isSuperAdmin: false, // Added this
   });
 
   useEffect(() => {
@@ -13,7 +14,8 @@ const UserEditModal = ({ isOpen, onClose, onSubmit, initialData }) => {
       setFormData({
         name: initialData.name,
         email: initialData.email,
-        isAdmin: initialData.isAdmin,
+        isAdmin: initialData.isAdmin || false,
+        isSuperAdmin: initialData.isSuperAdmin || false,
       });
     }
   }, [isOpen, initialData]);
@@ -37,7 +39,7 @@ const UserEditModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
       <div className="relative w-full max-w-md mx-auto my-6 bg-white rounded-lg shadow-lg">
         <div className="flex items-center justify-between p-5 border-b border-gray-200">
-          <h3 className="text-xl font-semibold">Edit User</h3>
+          <h3 className="text-xl font-semibold">Edit User Permissions</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -57,7 +59,7 @@ const UserEditModal = ({ isOpen, onClose, onSubmit, initialData }) => {
               required
               value={formData.name}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none"
             />
           </div>
 
@@ -71,25 +73,46 @@ const UserEditModal = ({ isOpen, onClose, onSubmit, initialData }) => {
               required
               value={formData.email}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none"
             />
           </div>
 
-          <div className="flex items-center pt-2">
-            <input
-              id="isAdmin"
-              name="isAdmin"
-              type="checkbox"
-              checked={formData.isAdmin}
-              onChange={handleChange}
-              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-            />
-            <label
-              htmlFor="isAdmin"
-              className="ml-2 block text-sm text-gray-900"
-            >
-              User is Admin
-            </label>
+          <div className="space-y-3 pt-2">
+            {/* Is Admin Checkbox */}
+            <div className="flex items-center">
+              <input
+                id="isAdmin"
+                name="isAdmin"
+                type="checkbox"
+                checked={formData.isAdmin}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <label
+                htmlFor="isAdmin"
+                className="ml-2 block text-sm text-gray-900"
+              >
+                Is Admin (Can manage products)
+              </label>
+            </div>
+
+            {/* Is Super Admin Checkbox */}
+            <div className="flex items-center">
+              <input
+                id="isSuperAdmin"
+                name="isSuperAdmin"
+                type="checkbox"
+                checked={formData.isSuperAdmin}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+              />
+              <label
+                htmlFor="isSuperAdmin"
+                className="ml-2 block text-sm text-gray-900"
+              >
+                Is Super Admin (Can manage users)
+              </label>
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 mt-6">

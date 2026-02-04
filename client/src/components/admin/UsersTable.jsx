@@ -1,36 +1,27 @@
 import React, { useState } from "react";
-import { Edit, Trash2, UserPlus, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Edit, Trash2, ShieldAlert, ShieldCheck } from "lucide-react";
 import DeleteModal from "./DeleteModal";
 import UserEditModal from "./UserEditModal";
+// 1. Import Hooks
+import {
+  useGetAllUsersQuery,
+  useDeleteUserMutation,
+  useUpdateUserMutation,
+} from "../../services/user";
 
 const UsersTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const users = [
-    {
-      _id: "101",
-      name: "John Doe",
-      email: "john@example.com",
-      isSuperAdmin: true,
-      isAdmin: true,
-    },
-    {
-      _id: "102",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      isSuperAdmin: false,
-      isAdmin: true,
-    },
-    {
-      _id: "103",
-      name: "Regular Joe",
-      email: "joe@example.com",
-      isSuperAdmin: false,
-      isAdmin: false,
-    },
-  ];
+  // 2. Fetch Users
+  // Note: Backend returns { users: [...] }
+  const { data, isLoading, error } = useGetAllUsersQuery();
+  const users = data?.users || [];
+
+  // 3. Initialize Mutations
+  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
 
   // --- Handlers ---
   const handleEditClick = (user) => {
@@ -43,17 +34,43 @@ const UsersTable = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    console.log("Deleting User:", selectedUser._id);
-    setIsDeleteModalOpen(false);
-    setSelectedUser(null);
+  const handleConfirmDelete = async () => {
+    if (!selectedUser) return;
+    try {
+      await deleteUser(selectedUser._id).unwrap();
+      alert("User deleted successfully");
+      setIsDeleteModalOpen(false);
+      setSelectedUser(null);
+    } catch (err) {
+      console.error(err);
+      alert(err?.data?.message || "Error deleting user");
+    }
   };
 
-  const handleEditSubmit = (formData) => {
-    console.log("Updating User:", selectedUser._id, formData);
-    setIsEditModalOpen(false);
-    setSelectedUser(null);
+  const handleEditSubmit = async (formData) => {
+    if (!selectedUser) return;
+    try {
+      await updateUser({
+        id: selectedUser._id,
+        ...formData,
+      }).unwrap();
+      alert("User updated successfully");
+      setIsEditModalOpen(false);
+      setSelectedUser(null);
+    } catch (err) {
+      console.error(err);
+      alert(err?.data?.message || "Error updating user");
+    }
   };
+
+  if (isLoading)
+    return <div className="p-10 text-center">Loading users...</div>;
+  if (error)
+    return (
+      <div className="p-10 text-center text-red-500">
+        Error loading users (Are you Super Admin?)
+      </div>
+    );
 
   return (
     <>
@@ -62,7 +79,6 @@ const UsersTable = () => {
           <h3 className="text-lg font-medium leading-6 text-gray-900">
             User Management
           </h3>
-          {/* Note: No 'Add User' button as per requirements */}
         </div>
 
         <div className="overflow-x-auto">
@@ -116,11 +132,10 @@ const UsersTable = () => {
                     >
                       <Edit size={18} />
                     </button>
-                    {/* Optional: Disable delete button for Super Admins to prevent accidents */}
+                    {/* Prevent deleting yourself or other Super Admins (optional UI safety) */}
                     <button
                       onClick={() => handleDeleteClick(user)}
-                      className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                      disabled={user.isSuperAdmin}
+                      className="text-red-600 hover:text-red-900 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -143,8 +158,12 @@ const UsersTable = () => {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete User"
-        message={`Are you sure you want to delete user "${selectedUser?.name}"?`}
+        title={isDeleting ? "Deleting..." : "Delete User"}
+        message={
+          isDeleting
+            ? "Please wait..."
+            : `Are you sure you want to delete "${selectedUser?.name}"?`
+        }
       />
     </>
   );
