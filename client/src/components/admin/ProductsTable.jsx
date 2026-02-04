@@ -1,77 +1,69 @@
 import React, { useState } from "react";
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Plus, Loader } from "lucide-react";
 import DeleteModal from "./DeleteModal";
-import ProductFormModal from "./ProductFormModal"; // Import the updated modal
+import ProductFormModal from "./ProductFormModal";
+import {
+  useAddProductMutation,
+  useGetAllProductsQuery,
+} from "../../services/product";
+
+// 1. Import your hooks
 
 const ProductsTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-
-  // State to hold the product being edited (null if adding new)
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Dummy Data
-  const products = [
-    {
-      _id: "1",
-      name: "Sony Headphones",
-      price: 349,
-      category: "Electronics",
-      inStock: true,
-      description: "Great sound",
-      imageURL: "https://via.placeholder.com/150",
-    },
-    {
-      _id: "2",
-      name: "MacBook Air",
-      price: 1099,
-      category: "Computers",
-      inStock: true,
-      description: "Fast laptop",
-      imageURL: "https://via.placeholder.com/150",
-    },
-    {
-      _id: "3",
-      name: "Canon Camera",
-      price: 679,
-      category: "Cameras",
-      inStock: false,
-      description: "Clear photos",
-      imageURL: "https://via.placeholder.com/150",
-    },
-  ];
+  // 2. Fetch Data
+  // Note: accessing data?.products because your backend returns { products: [...] }
+  const { data, isLoading, error } = useGetAllProductsQuery();
+  const products = data?.products || [];
+
+  // 3. Initialize Mutation Hook
+  const [addProduct, { isLoading: isAdding }] = useAddProductMutation();
 
   // --- Handlers ---
-
-  const handleDeleteClick = (product) => {
-    setSelectedProduct(product);
-    setIsDeleteModalOpen(true);
-  };
-
-  const handleConfirmDelete = () => {
-    console.log("Deleting product:", selectedProduct._id);
-    setIsDeleteModalOpen(false);
-    setSelectedProduct(null);
-  };
 
   const handleAddClick = () => {
     setSelectedProduct(null); // Ensure we are in "Add" mode
     setIsFormModalOpen(true);
   };
 
-  const handleEditClick = (product) => {
-    setSelectedProduct(product); // Set data for "Edit" mode
-    setIsFormModalOpen(true);
+  const handleFormSubmit = async (formData) => {
+    try {
+      if (selectedProduct) {
+        // We will handle Edit later
+        console.log("Edit Mode");
+      } else {
+        // 4. Call the Add API
+        await addProduct(formData).unwrap();
+        alert("Product Added Successfully!");
+      }
+      setIsFormModalOpen(false);
+    } catch (err) {
+      console.error("Failed to save product:", err);
+      alert("Error adding product: " + (err?.data?.message || err.error));
+    }
   };
 
-  const handleFormSubmit = (formData) => {
-    if (selectedProduct) {
-      console.log("Update Existing Product:", selectedProduct._id, formData);
-    } else {
-      console.log("Create New Product:", formData);
-    }
-    setIsFormModalOpen(false);
+  // Keep these valid for the UI rendering, we will connect them later
+  const handleDeleteClick = (product) => {
+    setSelectedProduct(product);
+    setIsDeleteModalOpen(true);
   };
+  const handleConfirmDelete = () => setIsDeleteModalOpen(false);
+  const handleEditClick = (product) => {
+    /* Pending */
+  };
+
+  if (isLoading)
+    return <div className="p-10 text-center">Loading products...</div>;
+  if (error)
+    return (
+      <div className="p-10 text-center text-red-500">
+        Error loading products
+      </div>
+    );
 
   return (
     <>
@@ -82,9 +74,15 @@ const ProductsTable = () => {
           </h3>
           <button
             onClick={handleAddClick}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
+            disabled={isAdding} // Disable button while sending request
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none disabled:opacity-50"
           >
-            <Plus size={16} className="mr-2" />
+            {/* Show Spinner if adding */}
+            {isAdding ? (
+              <Loader className="animate-spin mr-2" size={16} />
+            ) : (
+              <Plus size={16} className="mr-2" />
+            )}
             Add Product
           </button>
         </div>
@@ -113,8 +111,24 @@ const ProductsTable = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {products.map((product) => (
                 <tr key={product._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {product.name}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {/* Display Image */}
+                      <div className="h-10 w-10 flex-shrink-0">
+                        <img
+                          className="h-10 w-10 rounded-full object-cover"
+                          src={
+                            product.imageURL || "https://via.placeholder.com/40"
+                          }
+                          alt=""
+                        />
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {product.name}
+                        </div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     ${product.price}
@@ -123,6 +137,7 @@ const ProductsTable = () => {
                     {product.category}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
+                    {/* Assuming backend returns boolean inStock */}
                     {product.inStock ? (
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                         In Stock
@@ -158,15 +173,13 @@ const ProductsTable = () => {
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
         onSubmit={handleFormSubmit}
-        initialData={selectedProduct} // Pass data if editing
+        initialData={selectedProduct}
       />
 
       <DeleteModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Product"
-        message={`Are you sure you want to delete "${selectedProduct?.name}"?`}
       />
     </>
   );

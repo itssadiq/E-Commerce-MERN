@@ -1,6 +1,7 @@
 const express = require("express");
 const { Product } = require("../model/product");
 const productRouter = express.Router();
+const { AuthMiddleware } = require("../middleware/auth");
 
 productRouter.get("/getAllProducts", async (req, res) => {
   try {
@@ -28,7 +29,7 @@ productRouter.get("/getProduct/:id", async (req, res) => {
   }
 });
 
-productRouter.post("/addProduct", async (req, res) => {
+productRouter.post("/addProduct", AuthMiddleware, async (req, res) => {
   try {
     const { name, description, price, category, imageURL } = req.body;
 
@@ -48,7 +49,7 @@ productRouter.post("/addProduct", async (req, res) => {
   }
 });
 
-productRouter.delete("/deleteProduct/:id", async (req, res) => {
+productRouter.delete("/deleteProduct/:id", AuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -66,7 +67,7 @@ productRouter.delete("/deleteProduct/:id", async (req, res) => {
   }
 });
 
-productRouter.patch("/editProduct/:id", async (req, res) => {
+productRouter.patch("/editProduct/:id", AuthMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
