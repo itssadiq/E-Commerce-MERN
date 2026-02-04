@@ -15,6 +15,24 @@ export const productApi = createApi({
       providesTags: ["Product"], // 2. Attach tag to the list
     }),
 
+    deleteProduct: build.mutation({
+      query: (id) => ({
+        url: `/deleteProduct/${id}`, // Matches your backend route
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Product"], // Automatically refreshes the list
+    }),
+
+    updateProduct: build.mutation({
+      // We accept an object containing { id, ...data }
+      query: ({ id, ...data }) => ({
+        url: `/editProduct/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Product"],
+    }),
+
     // Mutation to add
     addProduct: build.mutation({
       query: (formData) => ({
@@ -29,5 +47,7 @@ export const productApi = createApi({
 
 export const {
   useGetAllProductsQuery,
-  useAddProductMutation, // Export the hook
+  useAddProductMutation,
+  useDeleteProductMutation,
+  useUpdateProductMutation,
 } = productApi;

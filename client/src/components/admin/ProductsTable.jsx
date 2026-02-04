@@ -5,56 +5,81 @@ import ProductFormModal from "./ProductFormModal";
 import {
   useAddProductMutation,
   useGetAllProductsQuery,
+  useDeleteProductMutation,
+  useUpdateProductMutation, // 1. Import Edit Hook
 } from "../../services/product";
-
-// 1. Import your hooks
 
 const ProductsTable = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // 2. Fetch Data
-  // Note: accessing data?.products because your backend returns { products: [...] }
+  // Fetch Data
   const { data, isLoading, error } = useGetAllProductsQuery();
   const products = data?.products || [];
 
-  // 3. Initialize Mutation Hook
+  // Initialize Mutation Hooks
   const [addProduct, { isLoading: isAdding }] = useAddProductMutation();
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation(); // 2. Initialize Edit Hook
 
   // --- Handlers ---
 
   const handleAddClick = () => {
-    setSelectedProduct(null); // Ensure we are in "Add" mode
+    setSelectedProduct(null); // Clear selection -> Add Mode
     setIsFormModalOpen(true);
   };
 
-  const handleFormSubmit = async (formData) => {
-    try {
-      if (selectedProduct) {
-        // We will handle Edit later
-        console.log("Edit Mode");
-      } else {
-        // 4. Call the Add API
-        await addProduct(formData).unwrap();
-        alert("Product Added Successfully!");
-      }
-      setIsFormModalOpen(false);
-    } catch (err) {
-      console.error("Failed to save product:", err);
-      alert("Error adding product: " + (err?.data?.message || err.error));
-    }
+  const handleEditClick = (product) => {
+    setSelectedProduct(product); // Set selection -> Edit Mode
+    setIsFormModalOpen(true);
   };
 
-  // Keep these valid for the UI rendering, we will connect them later
   const handleDeleteClick = (product) => {
     setSelectedProduct(product);
     setIsDeleteModalOpen(true);
   };
-  const handleConfirmDelete = () => setIsDeleteModalOpen(false);
-  const handleEditClick = (product) => {
-    /* Pending */
+
+  // 3. Handle Submit (Add or Update)
+  const handleFormSubmit = async (formData) => {
+    try {
+      if (selectedProduct) {
+        // --- EDIT MODE ---
+        await updateProduct({
+          id: selectedProduct._id,
+          ...formData,
+        }).unwrap();
+        alert("Product Updated Successfully!");
+      } else {
+        // --- ADD MODE ---
+        await addProduct(formData).unwrap();
+        alert("Product Added Successfully!");
+      }
+      setIsFormModalOpen(false);
+      setSelectedProduct(null); // Reset selection
+    } catch (err) {
+      console.error("Failed to save product:", err);
+      alert("Error saving product: " + (err?.data?.message || err.error));
+    }
   };
+
+  // Handle Delete Confirmation
+  const handleConfirmDelete = async () => {
+    if (!selectedProduct) return;
+
+    try {
+      await deleteProduct(selectedProduct._id).unwrap();
+      alert("Product Deleted Successfully");
+      setIsDeleteModalOpen(false);
+      setSelectedProduct(null);
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert("Error deleting product: " + (err?.data?.message || err.error));
+    }
+  };
+
+  // Combined Loading state for the Submit button
+  const isSaving = isAdding || isUpdating;
 
   if (isLoading)
     return <div className="p-10 text-center">Loading products...</div>;
@@ -74,10 +99,9 @@ const ProductsTable = () => {
           </h3>
           <button
             onClick={handleAddClick}
-            disabled={isAdding} // Disable button while sending request
+            disabled={isSaving}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none disabled:opacity-50"
           >
-            {/* Show Spinner if adding */}
             {isAdding ? (
               <Loader className="animate-spin mr-2" size={16} />
             ) : (
@@ -113,7 +137,6 @@ const ProductsTable = () => {
                 <tr key={product._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      {/* Display Image */}
                       <div className="h-10 w-10 flex-shrink-0">
                         <img
                           className="h-10 w-10 rounded-full object-cover"
@@ -137,7 +160,6 @@ const ProductsTable = () => {
                     {product.category}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {/* Assuming backend returns boolean inStock */}
                     {product.inStock ? (
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                         In Stock
@@ -180,6 +202,12 @@ const ProductsTable = () => {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
+        title={isDeleting ? "Deleting..." : "Delete Product"}
+        message={
+          isDeleting
+            ? "Please wait..."
+            : `Are you sure you want to delete "${selectedProduct?.name}"?`
+        }
       />
     </>
   );
