@@ -6,6 +6,7 @@ const connectDB = require("./config/database");
 const cors = require("cors");
 const { authRouter } = require("./router/auth");
 const { productRouter } = require("./router/product");
+const { userRouter } = require("./router/userRoutes");
 
 const app = express();
 app.use(
@@ -19,6 +20,7 @@ app.use(cookieParser());
 
 app.use("/auth", authRouter);
 app.use("/products", productRouter);
+app.use("/users", userRouter);
 
 const port = process.env.PORT || 5000;
 

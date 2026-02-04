@@ -26,6 +26,10 @@ const AuthSchema = Schema(
         }
       },
     },
+    isSuperAdmin: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       trim: true,
